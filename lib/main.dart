@@ -6,17 +6,15 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'models/users.dart';
 
-Future<List<User>> fetchUsers(http.Client client) async {
-  final response = await client
-      .get(Uri.parse('https://jsonplaceholder.typicode.com/users'));
-
-  return compute(parseUsers, response.body);
-}
-
-List<User> parseUsers(String responseBody) {
-  final parsed = jsonDecode(responseBody).cast<Map<String, dynamic>>();
-
-  return parsed.map<User>((json) => User.fromJson(json)).toList();
+Future<List<User>> fetchUsers() async {
+  final response =
+      await http.get(Uri.parse('https://jsonplaceholder.typicode.com/users'));
+  if (response.statusCode == 200) {
+    List jsonResponse = json.decode(response.body);
+    return jsonResponse.map((data) => new User.fromJson(data)).toList();
+  } else {
+    throw Exception('Unexpected error occured!');
+  }
 }
 
 void main() {
@@ -28,9 +26,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Users App',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Users Home Page'),
@@ -39,7 +38,6 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatelessWidget {
-
   final String title;
 
   const MyHomePage({Key key, this.title}) : super(key: key);
@@ -51,7 +49,7 @@ class MyHomePage extends StatelessWidget {
         title: Text(title),
       ),
       body: FutureBuilder<List<User>>(
-        future: fetchUsers(http.Client()),
+        future: fetchUsers(),
         builder: (context, snapshot) {
           if (snapshot.hasError) print(snapshot.error);
 
@@ -71,14 +69,21 @@ class UsersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-      ),
+    return ListView.builder(
       itemCount: users.length,
       itemBuilder: (context, index) {
-        return Image.network(users[index].name);
+        return Container(
+          margin: EdgeInsets.only(left: 10, right: 10),
+          height: 75,
+          color: Colors.white,
+          child: Card(
+            child: ListTile(
+              leading: Text(users[index].id.toString()),
+              title: Text(users[index].name),
+              onTap: () {},
+            ),
+          ),
+        );
       },
     );
   }
