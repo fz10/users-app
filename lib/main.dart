@@ -80,11 +80,45 @@ class UsersList extends StatelessWidget {
             child: ListTile(
               leading: Text(users[index].id.toString()),
               title: Text(users[index].name),
-              onTap: () {},
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) =>
+                      _buildPopupDialog(context, users[index]),
+                );
+              },
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPopupDialog(BuildContext context, User user) {
+    return new AlertDialog(
+      title: const Text('User Details'),
+      content: new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Text("id: ${user.id}"),
+          Text("name: ${user.name}"),
+          Text("username: ${user.name}"),
+          Text("email: ${user.email}"),
+          Text("address: ${user.address.city}, ${user.address.street}"),
+          Text("phone: ${user.phone}"),
+          Text("website: ${user.website}"),
+          Text("Company: ${user.company.name}"),
+        ],
+      ),
+      actions: <Widget>[
+        new TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text('Close'),
+        ),
+      ],
     );
   }
 }
